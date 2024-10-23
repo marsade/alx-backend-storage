@@ -9,6 +9,7 @@ import redis
 class Cache:
     ''' A redis cache'''
     def __init__(self) -> None:
+        '''Initializes the redis client'''
         self._redis = redis.Redis()
         self._redis.flushdb()
 
