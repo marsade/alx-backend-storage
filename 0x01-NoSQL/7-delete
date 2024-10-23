@@ -1,6 +1,5 @@
 // Delete documents under condition
 
-db.school.delete({
-	name: 'Holberton school',
-  limit: 0
+db.school.deleteMany({
+	name: 'Holberton school'
 })
