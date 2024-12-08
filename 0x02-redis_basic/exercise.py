@@ -11,7 +11,7 @@ from typing import Union, Callable, Optional
 def count_calls(method: Callable) -> Callable:
     '''Counts the number of times a function is called
     Args:
-        func: The function to be decorated
+        method: The function to be decorated
     Returns: The decorated function with a counter'''
     @wraps(method)
     def wrapper(self, *args, **kwargs) -> Union[str, bytes, int, float]:
@@ -29,10 +29,17 @@ def count_calls(method: Callable) -> Callable:
 
 
 def call_history(method: Callable) -> Callable:
-    '''Stores the call history of a function'''
+    '''Stores the call history of a function
+    Args:
+        method: The function to be decorated
+    Returns: The decorated function with call history'''
     @wraps(method)
     def wrapper(self, *args, **kwargs) -> Union[str, bytes, int, float]:
-        '''Extends the function with call history'''
+        '''Extends the function with call history
+        Args:
+            *args: Positional arguments
+            **kwargs: Keyword arguments
+        Returns: The result of the function call'''
         key = method.__qualname__
         input_listn = f'{key}:inputs'
         output_listn = f'{key}:outputs'
@@ -41,6 +48,22 @@ def call_history(method: Callable) -> Callable:
         self._redis.rpush(output_listn, str(data))
         return data
     return wrapper
+
+
+def replay(method):
+    '''Replays the call history of a function
+    Args:
+        method: The function to be decorated
+    Returns: The decorated function with call history'''
+    name = method.__qualname__
+    cache = redis.Redis()
+    calls = cache.get(name).decode("utf-8")
+    print("{} was called {} times:".format(name, calls))
+    inputs = cache.lrange(name + ":inputs", 0, -1)
+    outputs = cache.lrange(name + ":outputs", 0, -1)
+    for i, o in zip(inputs, outputs):
+        print("{}(*{}) -> {}".format(name, i.decode('utf-8'),
+                                     o.decode('utf-8')))
 
 
 class Cache:
