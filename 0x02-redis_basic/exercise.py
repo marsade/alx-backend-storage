@@ -8,7 +8,7 @@ from functools import wraps
 from typing import Union, Callable, Optional
 
 
-def count_calls(func: Callable) -> Callable:
+def count_calls(method: Callable) -> Callable:
     '''Counts the number of times a function is called
     Args:
         func: The function to be decorated
@@ -20,9 +20,9 @@ def count_calls(func: Callable) -> Callable:
             **kwargs: Keyword arguments
         Returns:
         The result of the function call or the transformed value if specified'''
-        key = func.__qualname__
+        key = method.__qualname__
         self._redis.incr(key)
-        return func(*args, **kwargs)
+        return method(*args, **kwargs)
 
 class Cache:
     ''' A redis cache'''
