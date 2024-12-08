@@ -37,8 +37,9 @@ def call_history(method: Callable) -> Callable:
         input_listn = f'{key}:inputs'
         output_listn = f'{key}:outputs'
         self._redis.rpush(input_listn, str(args))
-        self._redis.rpush(output_listn, str(method(self, *args, **kwargs)))
-        return method(self, *args, **kwargs)
+        data = method(self, *args, **kwargs)
+        self._redis.rpush(output_listn, str(data))
+        return data
     return wrapper
 
 
