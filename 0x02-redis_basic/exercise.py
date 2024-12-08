@@ -24,6 +24,7 @@ def count_calls(method: Callable) -> Callable:
         key = method.__qualname__
         self._redis.incr(key)
         return method(*args, **kwargs)
+    return wrapper
 
 class Cache:
     ''' A redis cache'''
