@@ -20,11 +20,27 @@ def count_calls(method: Callable) -> Callable:
             *args: Positional arguments
             **kwargs: Keyword arguments
         Returns:
-        The result of the function call or the transformed value if specified'''
+        The result of the function call or the
+        transformed value if specified'''
         key = method.__qualname__
         self._redis.incr(key)
         return method(self, *args, **kwargs)
     return wrapper
+
+
+def call_history(method: Callable) -> Callable:
+    '''Stores the call history of a function'''
+    @wraps(method)
+    def wrapper(self, *args, **kwargs) -> Union[str, bytes, int, float]:
+        '''Extends the function with call history'''
+        key = method.__qualname__
+        input_listn = f'{key}:inputs'
+        output_listn = f'{key}:outputs'
+        self._redis.rpush(input_listn, str(args))
+        self._redis.rpush(output_listn, str(method(self, *args, **kwargs)))
+        return method(self, *args, **kwargs)
+    return wrapper
+
 
 class Cache:
     ''' A redis cache'''
@@ -34,6 +50,7 @@ class Cache:
         self._redis.flushdb()
 
     @count_calls
+    @call_history
     def store(self, data: Union[str, bytes, int, float]) -> str:
         '''Set a value in Redis'''
         key = str(uuid.uuid4())
