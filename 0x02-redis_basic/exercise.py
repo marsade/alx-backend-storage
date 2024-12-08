@@ -23,7 +23,7 @@ def count_calls(method: Callable) -> Callable:
         The result of the function call or the transformed value if specified'''
         key = method.__qualname__
         self._redis.incr(key)
-        return method(*args, **kwargs)
+        return method(self, *args, **kwargs)
     return wrapper
 
 class Cache:
