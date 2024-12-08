@@ -4,8 +4,25 @@ This script writes strings to Redis
 '''
 import uuid
 import redis
+from functools import wraps
 from typing import Union, Callable, Optional
 
+
+def count_calls(func: Callable) -> Callable:
+    '''Counts the number of times a function is called
+    Args:
+        func: The function to be decorated
+    Returns: The decorated function with a counter'''
+    def wrapper(self, *args, **kwargs) -> Union[str, bytes, int, float]:
+        '''Wrapper function
+        Args:
+            *args: Positional arguments
+            **kwargs: Keyword arguments
+        Returns:
+        The result of the function call or the transformed value if specified'''
+        key = func.__qualname__
+        self._redis.incr(key)
+        return func(*args, **kwargs)
 
 class Cache:
     ''' A redis cache'''
@@ -14,6 +31,7 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
+    @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
         '''Set a value in Redis'''
         key = str(uuid.uuid4())
