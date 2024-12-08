@@ -13,6 +13,7 @@ def count_calls(method: Callable) -> Callable:
     Args:
         func: The function to be decorated
     Returns: The decorated function with a counter'''
+    @wraps(method)
     def wrapper(self, *args, **kwargs) -> Union[str, bytes, int, float]:
         '''Wrapper function
         Args:
